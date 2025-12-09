@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Full Name",
+      "minLength": 3,
+      "errorMessage": {
+        "minLength": "Name must be at least 3 characters"
+      }
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email Address"
+    },
+    "age": {
+      "type": "number",
+      "title": "Your Age",
+      "minimum": 0,
+      "maximum": 120
+    },
+    "serviceRating": {
+      "type": "number",
+      "title": "Rate Our Service",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "profilePicture": {
+      "type": "string",
+      "format": "data-url",
+      "title": "Profile Picture"
+    },
+    "comments": {
+      "type": "string",
+      "title": "Comments",
+      "description": "Optional feedback"
+    },
+    "subscribe": {
+      "type": "boolean",
+      "title": "Subscribe to newsletter"
+    }
+  },
+  "required": ["name", "email", "age"]
+}
