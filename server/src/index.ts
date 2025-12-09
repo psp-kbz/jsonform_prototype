@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import submitRoute from "./routes/submit";
 import submissionsRoute from "./routes/submissions";
 import eventsRoute from "./routes/events";
+import uploadRoute from "./routes/upload";
 
 const app = new Hono();
 
@@ -11,7 +12,10 @@ const app = new Hono();
 app.use(
   "/*",
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://literate-space-xylophone-7vrjppgvwjgjhp9wj-3000.app.github.dev"
+    ],
     credentials: true,
   })
 );
@@ -20,6 +24,7 @@ app.use(
 app.route("/api/submit", submitRoute);
 app.route("/api/submissions", submissionsRoute);
 app.route("/api/events", eventsRoute);
+app.route("/api/uploadthing", uploadRoute);
 
 // Health check
 app.get("/health", (c) => {

@@ -60,32 +60,34 @@ const JsonFormsDemo = () => {
         throw new Error("Submission failed");
       }
 
-      // Connect to SSE for async processing
+      // Show immediate success toast
+      enqueueSnackbar("Form submitted successfully!", { variant: "success" });
+
+      // Clear form data immediately after submission
+      setData({});
+
+      // Connect to SSE for async processing in background (don't await)
       const eventSource = new EventSource(`/api/events/${sessionId}`);
 
-      return new Promise((resolve, reject) => {
-        eventSource.onmessage = (event) => {
-          const message = JSON.parse(event.data);
+      eventSource.onmessage = (event) => {
+        const message = JSON.parse(event.data);
 
-          if (message.type === "complete") {
-            enqueueSnackbar("Data saved to database!", { variant: "success" });
-            eventSource.close();
-            resolve(message);
-          } else if (message.type === "error") {
-            enqueueSnackbar("Processing failed", { variant: "error" });
-            eventSource.close();
-            reject(new Error(message.message));
-          }
-        };
-
-        eventSource.onerror = () => {
+        if (message.type === "complete") {
+          enqueueSnackbar("Data synced to database successfully!", { variant: "success" });
           eventSource.close();
-          reject(new Error("Connection failed"));
-        };
-      });
-    },
-    onSuccess: () => {
-      enqueueSnackbar("Form submitted successfully!", { variant: "success" });
+        } else if (message.type === "error") {
+          enqueueSnackbar("Data sync failed", { variant: "error" });
+          eventSource.close();
+        }
+      };
+
+      eventSource.onerror = () => {
+        enqueueSnackbar("Connection to sync service failed", { variant: "warning" });
+        eventSource.close();
+      };
+
+      // Return immediately without waiting for SSE
+      return { sessionId };
     },
     onError: (error: Error) => {
       enqueueSnackbar(`Error: ${error.message}`, { variant: "error" });

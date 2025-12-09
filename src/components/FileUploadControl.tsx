@@ -1,11 +1,12 @@
 import { withJsonFormsControlProps } from "@jsonforms/react";
-import { Box, Typography, Button, TextField } from "@mui/material";
+import { Box, Typography, Button, TextField, Link } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useState } from "react";
+import { useUploadThing } from "../utils/uploadthing";
 
 interface FileUploadControlProps {
-  data: string;
-  handleChange: (path: string, value: string) => void;
+  data: any;
+  handleChange: (path: string, value: any) => void;
   path: string;
   label: string;
   errors?: string;
@@ -25,6 +26,23 @@ const FileUploadControl = ({
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState("");
 
+  const { startUpload } = useUploadThing("fileUploader", {
+    onClientUploadComplete: (res) => {
+      if (res && res[0]) {
+        // Store an object with both url and filename for better display
+        handleChange(path, {
+          url: res[0].url,
+          name: fileName || res[0].name,
+        });
+        setUploading(false);
+      }
+    },
+    onUploadError: (error: Error) => {
+      console.error("Upload failed:", error);
+      setUploading(false);
+    },
+  });
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -35,19 +53,19 @@ const FileUploadControl = ({
     setFileName(file.name);
 
     try {
-      // Convert file to data URL (base64)
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        handleChange(path, dataUrl);
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
+      await startUpload([file]);
     } catch (error) {
       console.error("Upload failed:", error);
       setUploading(false);
     }
   };
+
+  // Extract filename from data (handle both old string format and new object format)
+  const displayName = typeof data === "string" 
+    ? data.split("/").pop() || data 
+    : data?.name || "";
+  
+  const fileUrl = typeof data === "string" ? data : data?.url;
 
   return (
     <Box sx={{ my: 2 }}>
@@ -69,16 +87,25 @@ const FileUploadControl = ({
             accept="image/*,.pdf"
           />
         </Button>
-        {(fileName || data) && (
+        {fileUrl && (
           <TextField
-            value={fileName || "File uploaded"}
+            value={displayName}
             disabled
             size="small"
             sx={{ flexGrow: 1 }}
+            placeholder="File name will appear here"
+            InputProps={{
+              endAdornment: (
+                <Link href={fileUrl} target="_blank" rel="noopener" sx={{ ml: 1 }}>
+                  View
+                </Link>
+              ),
+            }}
           />
         )}
       </Box>
-      {errors && (
+      {/* Don't show type validation errors for file uploads */}
+      {errors && !errors.includes("must be") && (
         <Typography variant="caption" color="error">
           {errors}
         </Typography>

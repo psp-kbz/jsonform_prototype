@@ -27,9 +27,16 @@
       "maximum": 5
     },
     "profilePicture": {
-      "type": "string",
-      "format": "data-url",
-      "title": "Profile Picture"
+      "type": ["object", "null"],
+      "title": "Profile Picture",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
     },
     "comments": {
       "type": "string",
