@@ -1,6 +1,8 @@
-import { rankWith, scopeEndsWith } from "@jsonforms/core";
+import { rankWith, and, schemaMatches } from "@jsonforms/core";
 
 export const fileUploadControlTester = rankWith(
-  5,
-  scopeEndsWith("profilePicture")
+  10,
+  and(
+    schemaMatches((schema) => schema.format === "data-url" || schema.contentMediaType !== undefined)
+  )
 );

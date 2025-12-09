@@ -1,5 +1,6 @@
 import { withJsonFormsControlProps } from "@jsonforms/react";
 import { Box, Typography, Button } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 interface FileUploadControlProps {
   data: any;
@@ -28,7 +29,7 @@ const FileUploadControl = ({
       <Typography variant="body2" mb={1}>
         {label || "File Upload"}
       </Typography>
-      <Button variant="contained" component="label">
+      <Button variant="contained" component="label" startIcon={<CloudUploadIcon />}>
         Choose File
         <input type="file" hidden onChange={handleFileChange} accept="image/*,.pdf" />
       </Button>

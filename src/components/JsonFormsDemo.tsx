@@ -19,6 +19,7 @@ import { useFormStore } from "../store/formStore";
 import RatingControl from "./RatingControl";
 import AgeSliderControl from "./AgeSliderControl";
 import FileUploadControl from "./FileUploadControl";
+import SchemaGenerator from "./SchemaGenerator";
 import { ratingControlTester } from "../testers/ratingControlTester";
 import { ageSliderControlTester } from "../testers/ageSliderControlTester";
 import { fileUploadControlTester } from "../testers/fileUploadControlTester";
@@ -123,14 +124,12 @@ const JsonFormsDemo = () => {
     },
   });
 
-  const handleFormatAndSave = () => {
-    try {
-      const parsed = JSON.parse(schemaText);
-      setSchema(parsed);
-      enqueueSnackbar("Schema updated successfully", { variant: "success" });
-    } catch (error) {
-      enqueueSnackbar("Invalid JSON schema", { variant: "error" });
-    }
+
+  const handleSchemaGenerated = (generatedSchema: any) => {
+    const formattedSchema = JSON.stringify(generatedSchema, null, 2);
+    setSchemaText(formattedSchema);
+    setSchema(generatedSchema);
+    enqueueSnackbar("Schema generated successfully!", { variant: "success" });
   };
 
   const handleSubmit = () => {
@@ -159,13 +158,16 @@ const JsonFormsDemo = () => {
         </Button>
       </Box>
 
+      {/* Schema Generator */}
+      <SchemaGenerator onSchemaGenerated={handleSchemaGenerated} />
+
       <Grid container spacing={3}>
         {/* Left Panel - Schema Editor */}
         <Grid item xs={12} md={4}>
           <Paper
             sx={{
               p: 2,
-              height: "700px",
+              minHeight: "400px",
               display: "flex",
               flexDirection: "column",
             }}
@@ -178,30 +180,38 @@ const JsonFormsDemo = () => {
               fullWidth
               value={schemaText}
               onChange={(e) => setSchemaText(e.target.value)}
-              sx={{ flexGrow: 1, fontFamily: "monospace", mb: 2 }}
+              sx={{ flexGrow: 1, fontFamily: "monospace" }}
               InputProps={{
                 sx: { fontFamily: "monospace", fontSize: "0.875rem" },
               }}
+              helperText="Schema is read-only. Use the JSON data editor above to generate a new schema."
             />
-            <Button variant="contained" onClick={handleFormatAndSave} fullWidth>
-              Format & Save
-            </Button>
           </Paper>
         </Grid>
 
         {/* Middle Panel - Form */}
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 2, height: "700px", overflow: "auto" }}>
+          <Paper 
+            sx={{ 
+              p: 2, 
+              minHeight: "400px",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column"
+            }}
+          >
             <Typography variant="h6" gutterBottom>
               Generated Form
             </Typography>
-            <JsonForms
-              schema={schema}
-              data={data}
-              renderers={renderers}
-              cells={materialCells}
-              onChange={({ data: newData }) => setData(newData)}
-            />
+            <Box sx={{ flexGrow: 1, overflow: "auto" }}>
+              <JsonForms
+                schema={schema}
+                data={data}
+                renderers={renderers}
+                cells={materialCells}
+                onChange={({ data: newData }) => setData(newData)}
+              />
+            </Box>
             <Button
               variant="contained"
               color="primary"
@@ -217,7 +227,16 @@ const JsonFormsDemo = () => {
 
         {/* Right Panel - Bound Data */}
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 2, height: "700px", overflow: "auto" }}>
+          <Paper 
+            sx={{ 
+              p: 2, 
+              maxHeight: { xs: "500px", md: "calc(100vh - 250px)" },
+              minHeight: "400px",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column"
+            }}
+          >
             <Typography variant="h6" gutterBottom>
               Bound Data
             </Typography>
@@ -228,6 +247,9 @@ const JsonFormsDemo = () => {
                 fontSize: "0.875rem",
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
+                overflow: "auto",
+                flexGrow: 1,
+                m: 0,
               }}
             >
               {JSON.stringify(data, null, 2)}

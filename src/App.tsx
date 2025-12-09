@@ -25,7 +25,7 @@ function App() {
         <CssBaseline />
         <SnackbarProvider
           maxSnack={3}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         >
           <JsonFormsDemo />
         </SnackbarProvider>

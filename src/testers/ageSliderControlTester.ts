@@ -1,3 +1,9 @@
-import { rankWith, scopeEndsWith } from "@jsonforms/core";
+import { rankWith, and, scopeEndsWith, schemaMatches } from "@jsonforms/core";
 
-export const ageSliderControlTester = rankWith(5, scopeEndsWith("age"));
+export const ageSliderControlTester = rankWith(
+  5,
+  and(
+    scopeEndsWith("age"),
+    schemaMatches((schema) => schema.type === "number" || schema.type === "integer")
+  )
+);
