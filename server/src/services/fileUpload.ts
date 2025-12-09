@@ -1,7 +1,13 @@
 import { createUploadthing, type FileRouter } from "uploadthing/server";
+import { UTApi } from "uploadthing/server";
 import "dotenv/config";
 
 const f = createUploadthing();
+
+// Initialize UploadThing API instance for server-side uploads
+export const utapi = new UTApi({
+  token: process.env.UPLOADTHING_TOKEN,
+});
 
 export const uploadRouter = {
   fileUploader: f({ 

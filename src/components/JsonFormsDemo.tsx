@@ -48,13 +48,38 @@ const JsonFormsDemo = () => {
   const submitMutation = useMutation({
     mutationFn: async (formData: object) => {
       const sessionId = `session-${Date.now()}`;
+      const hasFiles = Object.values(formData).some((v) => v instanceof File);
 
-      // Submit form data
-      const response = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: formData, sessionId }),
-      });
+      let response;
+      if (hasFiles) {
+        // Send as FormData if there are files
+        const formDataObj = new FormData();
+        const cleanData: any = {};
+
+        for (const [key, value] of Object.entries(formData)) {
+          if (value instanceof File) {
+            formDataObj.append(key, value);
+          } else {
+            cleanData[key] = value;
+          }
+        }
+
+        formDataObj.append("data", JSON.stringify(cleanData));
+        formDataObj.append("schema", JSON.stringify(schema));
+        formDataObj.append("sessionId", sessionId);
+
+        response = await fetch("/api/submit", {
+          method: "POST",
+          body: formDataObj,
+        });
+      } else {
+        // Send as JSON if no files
+        response = await fetch("/api/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: formData, schema, sessionId }),
+        });
+      }
 
       if (!response.ok) {
         throw new Error("Submission failed");
@@ -73,7 +98,9 @@ const JsonFormsDemo = () => {
         const message = JSON.parse(event.data);
 
         if (message.type === "complete") {
-          enqueueSnackbar("Data synced to database successfully!", { variant: "success" });
+          enqueueSnackbar("Data synced to database successfully!", {
+            variant: "success",
+          });
           eventSource.close();
         } else if (message.type === "error") {
           enqueueSnackbar("Data sync failed", { variant: "error" });
@@ -82,7 +109,9 @@ const JsonFormsDemo = () => {
       };
 
       eventSource.onerror = () => {
-        enqueueSnackbar("Connection to sync service failed", { variant: "warning" });
+        enqueueSnackbar("Connection to sync service failed", {
+          variant: "warning",
+        });
         eventSource.close();
       };
 

@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       port: 3000,
+      hmr: {
+        protocol: 'wss',
+        clientPort: 443,
+      },
       proxy: {
         "/api": {
           target: apiUrl,
@@ -17,6 +21,9 @@ export default defineConfig(({ mode }) => {
           secure: false,
         },
       },
+    },
+    optimizeDeps: {
+      include: ['@mui/material', '@mui/icons-material', 'react', 'react-dom'],
     },
   };
 });
